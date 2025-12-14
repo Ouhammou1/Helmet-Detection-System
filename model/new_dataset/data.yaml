@@ -2,7 +2,7 @@ names:
 - helmet
 - no_helmet
 nc: 2
-path: /home/bouhammo/Desktop/ocp/pr1/new_dataset
+path: /home/bouhammo/Desktop/ocp/test/deepseek/model/new_dataset
 test: test/images
 train: train/images
 val: valid/images
