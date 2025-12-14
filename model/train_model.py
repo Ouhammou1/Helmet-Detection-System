@@ -15,7 +15,7 @@ class CompleteHelmetTrainer:
         
         # Memory-safe training settings for Apple Silicon
         self.epochs = 50
-        self.batch_size = 2      # VERY small for memory safety
+        self.batch_size = 8    # VERY small for memory safety
         self.img_size = 320      # Reduced from 640
         self.patience = 20
         
@@ -141,7 +141,10 @@ class CompleteHelmetTrainer:
         
         # Try to use a small model for memory safety
         try:
-            model = YOLO('yolov8n.pt')  # Nano model - smallest
+            # model = YOLO('yolov8n.pt')  
+            # Nano model - smallest
+            model = YOLO("yolov8s.pt")
+
             print("✓ Using: YOLOv8n (Nano - 3.2M parameters)")
         except Exception as e:
             print(f"❌ Failed to load model: {e}")
