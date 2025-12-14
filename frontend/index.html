@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helmet Detection System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-hard-hat"></i> Helmet Detection System</h1>
+            <p class="subtitle">Powered by YOLOv8 | Clear HELMET DETECTED/NO HELMET DETECTED Labels</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="image-tab">
+                <i class="fas fa-image"></i> Image Detection
+            </button>
+            <button class="tab-btn" data-tab="video-tab">
+                <i class="fas fa-video"></i> Video Detection
+            </button>
+            <button class="tab-btn" data-tab="webcam-tab">
+                <i class="fas fa-camera"></i> Live Webcam
+            </button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Image Detection Tab -->
+            <div id="image-tab" class="tab-pane active">
+                <div class="main-content">
+                    <div class="upload-section">
+                        <h2><i class="fas fa-upload"></i> Upload Image</h2>
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <p>Drag & drop an image or click to browse</p>
+                            <input type="file" id="fileInput" accept="image/*" hidden>
+                            <button class="btn" id="browseBtn">Choose File</button>
+                            <div id="fileDisplay" class="file-display" style="display: none;">
+                                <i class="fas fa-file-image"></i>
+                                <div class="file-details">
+                                    <strong id="fileName"></strong>
+                                    <small id="fileSize"></small>
+                                </div>
+                                <button class="btn-clear" onclick="clearFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <p class="file-info">Supported: JPG, PNG, BMP, GIF (Max: 100MB)</p>
+                        </div>
+                        
+                        <button class="btn btn-process" id="processBtn" disabled>
+                            <i class="fas fa-play"></i> Process Image
+                        </button>
+                        
+                        <div class="results-section">
+                            <h3><i class="fas fa-chart-bar"></i> Detection Results</h3>
+                            <div class="stats">
+                                <div class="stat-card helmet">
+                                    <i class="fas fa-hard-hat"></i>
+                                    <span id="helmetCount">0</span>
+                                    <p>Helmets Detected</p>
+                                </div>
+                                <div class="stat-card no-helmet">
+                                    <i class="fas fa-user-slash"></i>
+                                    <span id="noHelmetCount">0</span>
+                                    <p>No Helmets Detected</p>
+                                </div>
+                                <div class="stat-card confidence">
+                                    <i class="fas fa-percentage"></i>
+                                    <span id="avgConfidence">0%</span>
+                                    <p>Avg Confidence</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-section">
+                        <h2><i class="fas fa-eye"></i> Preview</h2>
+                        <div class="preview-container">
+                            <div class="preview-placeholder" id="previewPlaceholder">
+                                <i class="fas fa-image"></i>
+                                <p>Upload an image to see preview with detection labels</p>
+                            </div>
+                            <canvas id="previewCanvas" style="display: none;"></canvas>
+                            <!-- Processed image will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Video Detection Tab -->
+            <div id="video-tab" class="tab-pane">
+                <div class="main-content">
+                    <div class="upload-section">
+                        <h2><i class="fas fa-video"></i> Upload Video</h2>
+                        <div class="upload-area" id="videoUploadArea">
+                            <i class="fas fa-film upload-icon"></i>
+                            <p>Drag & drop a video or click to browse</p>
+                            <input type="file" id="videoInput" accept="video/*" hidden>
+                            <button class="btn" id="videoBrowseBtn">Choose Video</button>
+                            <div id="videoFileDisplay" class="file-display" style="display: none;">
+                                <i class="fas fa-file-video"></i>
+                                <div class="file-details">
+                                    <strong id="videoFileName"></strong>
+                                    <small id="videoFileSize"></small>
+                                </div>
+                                <button class="btn-clear" onclick="clearVideoFile()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <p class="file-info">Supported: MP4, AVI, MOV, MKV, WEBM (Max: 100MB)</p>
+                        </div>
+                        
+                        <button class="btn btn-process" id="processVideoBtn" disabled>
+                            <i class="fas fa-play-circle"></i> Process Video
+                        </button>
+                        
+                        <div class="processing-progress" id="processingProgress" style="display: none;">
+                            <h4>Processing Progress</h4>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progressBar"></div>
+                                <div class="progress-text" id="progressText">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="preview-section">
+                        <h2><i class="fas fa-play-circle"></i> Processed Video</h2>
+                        <div class="video-preview-container">
+                            <div class="video-placeholder" id="videoPlaceholder">
+                                <i class="fas fa-video"></i>
+                                <p>Processed video will appear here</p>
+                            </div>
+                            <video id="processedVideo" controls style="display: none;"></video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webcam Tab -->
+            <div id="webcam-tab" class="tab-pane">
+                <div class="main-content">
+                    <div class="webcam-section-full">
+                        <h2><i class="fas fa-camera"></i> Live Webcam Detection</h2>
+                        
+                        <div class="webcam-controls">
+                            <button class="btn btn-webcam" id="webcamBtn">
+                                <i class="fas fa-video"></i> Start Webcam
+                            </button>
+                            <button class="btn btn-stop" id="stopBtn" disabled>
+                                <i class="fas fa-stop"></i> Stop
+                            </button>
+                        </div>
+                        
+                        <div class="webcam-container-large">
+                            <div class="webcam-placeholder" id="webcamPlaceholder">
+                                <i class="fas fa-video-slash"></i>
+                                <p>Click Start Webcam to begin detection</p>
+                            </div>
+                            <video id="webcamVideo" autoplay playsinline style="display: none;"></video>
+                            <canvas id="webcamCanvas" style="display: none;"></canvas>
+                        </div>
+                        
+                        <div class="webcam-stats">
+                            <div class="stat-card realtime">
+                                <i class="fas fa-bolt"></i>
+                                <span id="fpsCounter">0</span>
+                                <p>FPS</p>
+                            </div>
+                            <div class="stat-card detection-count">
+                                <i class="fas fa-bullseye"></i>
+                                <span id="currentDetections">0</span>
+                                <p>Current Detections</p>
+                            </div>
+                            <div class="stat-card helmet">
+                                <i class="fas fa-hard-hat"></i>
+                                <span id="webcamHelmetCount">0</span>
+                                <p>Helmets</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detections-section">
+            <h3><i class="fas fa-list"></i> Detection Details</h3>
+            <div class="detections-table-container">
+                <table id="detectionsTable">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Confidence</th>
+                            <th>Bounding Box</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detectionsBody">
+                        <!-- Detections will be populated here -->
+                    </tbody>
+                </table>
+                <div class="no-detections" id="noDetections">
+                    <i class="fas fa-search"></i>
+                    <p>No detections yet. Upload an image or start webcam.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <p id="loadingText">Processing...</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Helmet Detection System &copy; 2024 | Clear HELMET DETECTED/NO HELMET DETECTED Labels</p>
+        <div class="status-indicator">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Checking server status...</span>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
